@@ -1,0 +1,3 @@
+para gerar os pdfs foi instalando um software de edição latex e utilizar o comando por exemplo:
+
+jupyter nbconvert --to pdf capitulo1.ipynb
