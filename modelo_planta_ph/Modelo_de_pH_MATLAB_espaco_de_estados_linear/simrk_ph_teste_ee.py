@@ -1,22 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
-# Função que carrega os parâmetros do modelo contínuo (setup_pH)
-def setup_pH():
-    # Exemplo de parâmetros, ajuste conforme necessário
-    global par, Kas, x0, Ad, Bd
-    par = {'param1': 1, 'param2': 2}  # Exemplo de parâmetros
-    Kas = [1, 2, 3]  # Exemplo de constantes
-    x0 = np.zeros(7)  # Exemplo de estado inicial
-    Ad = np.eye(7)  # Matriz de estado linearizada
-    Bd = np.zeros((7, 2))  # Matriz de controle linearizada
-
-# Função que carrega matrizes em espaço de estado discreto linearizadas (pH_linear)
-def pH_linear():
-    # Exemplo de matrizes, ajuste conforme necessário
-    global Ad, Bd
-    Ad = np.eye(7)  # Matriz de estado linearizada
-    Bd = np.zeros((7, 2))  # Matriz de controle linearizada
+from pH_linear import Ad, Bd, par  # Importa variáveis de pH_linear
+from modelo_planta_ph.setup_pH import Kas, x0  # Importa Kas de setup_pH
 
 # Função de simulação (substituto para simrk_pH)
 def simrk_pH(x, Q1, Q3, h, t, par, Kas, Ts):
@@ -26,9 +11,6 @@ def simrk_pH(x, Q1, Q3, h, t, par, Kas, Ts):
     return xc, pHc
 
 # Configurações iniciais
-setup_pH()
-pH_linear()
-
 h = 10  # Intervalo de integração em segundos
 t0 = h  # Tempo inicial em segundos
 tm = 50  # Tempo de simulação em minutos
@@ -60,9 +42,18 @@ for k in range(1, 600 // Ts + 1):
     for i in range(7):
         xl[i, k] = Ad[i, i] * xl[i, k - 1]
     
-    p = np.roots([1, (Kas[0] - (xl[1, k] + x0[1])), (Kas[0] * Kas[1] - Kas[0] * (xl[1, k] + x0[1]) - Kas[2] - Kas[0] * (xl[2, k] + x0[2])), -(Kas[0] * Kas[2] + Kas[0] * Kas[1] * (xl[1, k] + x0[1]) + 2 * Kas[0] * Kas[1] * (xl[2, k] + x0[2])), -Kas[0] * Kas[1] * Kas[2]])
-    ch = np.max(np.real(p))
-    pHl[k] = -np.log10(ch)
+    # Verificar se os valores são finitos antes de calcular as raízes
+    coefficients = [1, (Kas[0] - (xl[1, k] + x0[1])), 
+                    (Kas[0] * Kas[1] - Kas[0] * (xl[1, k] + x0[1]) - Kas[2] - Kas[0] * (xl[2, k] + x0[2])), 
+                    -(Kas[0] * Kas[2] + Kas[0] * Kas[1] * (xl[1, k] + x0[1]) + 2 * Kas[0] * Kas[1] * (xl[2, k] + x0[2])), 
+                    -Kas[0] * Kas[1] * Kas[2]]
+    
+    if all(np.isfinite(coefficients)):
+        p = np.roots(coefficients)
+        ch = np.max(np.real(p))
+        pHl[k] = -np.log10(ch)
+    else:
+        pHl[k] = np.nan  # Definir como NaN se os coeficientes não forem finitos
 
 ini = k
 
@@ -81,9 +72,18 @@ for k in range(ini, len(T)):
     for i in range(7):
         xl[i, k] = Ad[i, i] * xl[i, k - 1] + Bd[i, 0] * du1[k] + Bd[i, 1] * du2[k]
     
-    p = np.roots([1, (Kas[0] - (xl[1, k] + x0[1])), (Kas[0] * Kas[1] - Kas[0] * (xl[1, k] + x0[1]) - Kas[2] - Kas[0] * (xl[2, k] + x0[2])), -(Kas[0] * Kas[2] + Kas[0] * Kas[1] * (xl[1, k] + x0[1]) + 2 * Kas[0] * Kas[1] * (xl[2, k] + x0[2])), -Kas[0] * Kas[1] * Kas[2]])
-    ch = np.max(np.real(p))
-    pHl[k] = -np.log10(ch)
+    # Verificar se os valores são finitos antes de calcular as raízes
+    coefficients = [1, (Kas[0] - (xl[1, k] + x0[1])), 
+                    (Kas[0] * Kas[1] - Kas[0] * (xl[1, k] + x0[1]) - Kas[2] - Kas[0] * (xl[2, k] + x0[2])), 
+                    -(Kas[0] * Kas[2] + Kas[0] * Kas[1] * (xl[1, k] + x0[1]) + 2 * Kas[0] * Kas[1] * (xl[2, k] + x0[2])), 
+                    -Kas[0] * Kas[1] * Kas[2]]
+    
+    if all(np.isfinite(coefficients)):
+        p = np.roots(coefficients)
+        ch = np.max(np.real(p))
+        pHl[k] = -np.log10(ch)
+    else:
+        pHl[k] = np.nan  # Definir como NaN se os coeficientes não forem finitos
 
 pplot = 1
 if pplot == 1:
