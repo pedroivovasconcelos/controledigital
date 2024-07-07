@@ -12,8 +12,8 @@ B = np.zeros((7, 2))
 x1 = 5.4064
 x2 = -3.5872e-05
 x3 = 1.1120e-03
-ux = 3
-uy = 2
+ux = 3 # acido forte
+uy = 2 # base forte
 
 A[0, 0] = -par[8] / (2 * par[2] * np.sqrt(x1 - par[9]))
 A[1, 1] = (-ux - par[0] - uy) / par[3]
