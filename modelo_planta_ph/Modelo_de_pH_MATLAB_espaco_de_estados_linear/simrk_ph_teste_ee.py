@@ -85,6 +85,14 @@ for k in range(ini, len(T)):
     else:
         pHl[k] = np.nan  # Definir como NaN se os coeficientes não forem finitos
 
+# Ponto de operação (últimos valores da simulação)
+op_point = x[:, -1]
+print("Valores das variáveis de estado no ponto de operação:")
+print(op_point)
+
+print("Últimos 5 valores do ponto de operação")
+print(pHl[-5:])
+
 pplot = 1
 if pplot == 1:
     plt.figure()

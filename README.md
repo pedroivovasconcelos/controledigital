@@ -9,3 +9,6 @@ Arquivos adicionais como cálculos
 manuais, respostas escritas a mão serão adicionados na pasta 
 *"anexos"* com o nome *"cXeY"* onde x é o capítulo e Y o 
 exercício.
+
+para gerar os capitulos em html:
+jupyter nbconvert --to html capitulo1.ipynb
